@@ -4,27 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PizzaTyper</title>
+<link rel="icon" href="pizza.png" type="image/png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
 body {
-  margin:0;
-  font-family:'Courier Prime', monospace;
-  background:#ffe5b4;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding-top:50px;
+  margin: 0;
+  font-family: 'Courier Prime', monospace;
+  background: #ffe5b4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* full viewport height */
 }
 
 .container {
-  max-width:800px;
-  width:100%;
-  background:#ff6347;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 0 20px rgba(0,0,0,0.5);
-  color:#fff;
+  max-width: 800px;
+  width: 100%;
+  background: #ff6347;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  color: #fff;
 }
 
 h1 { text-align:center; margin-bottom:20px; font-size:2em; }
@@ -77,9 +78,15 @@ input::placeholder { color:#b22222; }
   text-align:center;
 }
 
-#results button { background:#ff6347; color:#fff; padding:10px 20px; border:none; border-radius:10px; cursor:pointer; margin-top:10px; }
-
-button { display:none; } /* hide buttons for simplicity */
+#results button {
+  background:#ff6347;
+  color:#fff;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:10px;
+}
 </style>
 </head>
 <body>
@@ -209,6 +216,7 @@ input.addEventListener("input", ()=>{
 
 // Initialize
 generateText();
+input.focus();
 </script>
 </body>
 </html>
