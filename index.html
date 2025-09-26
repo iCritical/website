@@ -10,18 +10,17 @@
 body {
     margin: 0;
     font-family: 'Courier Prime', monospace;
-    background: #ffe5b4; /* pizza dough color */
+    background: #ffe5b4;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding-top: 50px;
-    overflow-x: hidden;
 }
 
 .container {
     max-width: 800px;
     width: 100%;
-    background: #ff6347; /* tomato sauce red */
+    background: #ff6347;
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
@@ -34,9 +33,7 @@ h1 {
     margin-bottom: 20px;
     font-size: 2em;
 }
-h1::before {
-    content: "🍕 ";
-}
+h1::before { content: "🍕 "; }
 
 .stats {
     display: flex;
@@ -46,7 +43,7 @@ h1::before {
 }
 
 .text-area {
-    background: #fff8dc; /* cheese color */
+    background: #fff8dc;
     padding: 15px;
     min-height: 150px;
     border-radius: 10px;
@@ -75,9 +72,7 @@ input[type="text"] {
     color: #000;
 }
 
-input::placeholder {
-    color: #b22222;
-}
+input::placeholder { color: #b22222; }
 
 button {
     padding: 10px 20px;
@@ -92,11 +87,8 @@ button {
     transition: 0.3s;
 }
 
-button:hover {
-    background: #ffd700;
-}
+button:hover { background: #ffd700; }
 
-/* Results popup */
 #results {
     position: fixed;
     top: 50%;
@@ -110,10 +102,7 @@ button:hover {
     display: none;
     text-align: center;
 }
-#results button {
-    background: #ff6347;
-    color: #fff;
-}
+#results button { background: #ff6347; color: #fff; }
 </style>
 </head>
 <body>
@@ -127,12 +116,6 @@ button:hover {
     </div>
     <div class="text-area" id="textToType"></div>
     <input type="text" id="userInput" placeholder="Tippe hier..." autocomplete="off">
-    <div>
-        <button onclick="startTest(15)">15s</button>
-        <button onclick="startTest(30)">30s</button>
-        <button onclick="startTest(60)">60s</button>
-        <button onclick="startTest(120)">2min</button>
-    </div>
 </div>
 
 <div id="results">
@@ -140,16 +123,17 @@ button:hover {
     <p>WPM: <span id="resWpm">0</span></p>
     <p>Accuracy: <span id="resAcc">0%</span></p>
     <p>Errors: <span id="resErr">0</span></p>
-    <button onclick="restartFromResults()">Neu starten</button>
+    <button onclick="restartTest()">Neu starten</button>
 </div>
 
 <script>
 const words = ["pizza","käse","tomate","basilikum","teig","stück","ofen","heiß","lecker","frisch","knusprig","sauce","würzig","essen","mittag","abend","snack","abendessen","italienisch","belag"];
 let fullText = "";
+let currentIndex = 0;
+let errors = 0;
 let timer, timeLeft;
 let started = false;
-let errors = 0;
-let currentIndex = 0;
+const totalTime = 30;
 
 const textDiv = document.getElementById("textToType");
 const input = document.getElementById("userInput");
@@ -170,32 +154,28 @@ function generateText() {
     }
     currentIndex = 0;
     errors = 0;
+    started = false;
+    input.value = "";
+    timeLeft = totalTime;
+    timeSpan.textContent = totalTime;
+    wpmSpan.textContent = 0;
+    accSpan.textContent = "100%";
+    errSpan.textContent = 0;
+    resultsDiv.style.display = "none";
     updateTextDisplay();
 }
 
 function updateTextDisplay() {
-    const chars = fullText.split('');
-    textDiv.innerHTML = chars.map((c,i)=>{
+    textDiv.innerHTML = fullText.split('').map((c,i)=>{
         if(i<currentIndex) return `<span class="correct">${c}</span>`;
         else if(i===currentIndex) return `<span class="current">${c}</span>`;
         else return `<span>${c}</span>`;
     }).join('');
 }
 
-function startTest(seconds){
-    clearInterval(timer);
-    generateText();
-    input.value = "";
-    input.disabled = false;
-    input.focus();
-    timeLeft = seconds;
-    timeSpan.textContent = timeLeft;
-    wpmSpan.textContent = 0;
-    accSpan.textContent = "100%";
-    errSpan.textContent = 0;
+function startTimer() {
+    if(started) return;
     started = true;
-    resultsDiv.style.display = "none";
-
     timer = setInterval(()=>{
         timeLeft--;
         timeSpan.textContent = timeLeft;
@@ -205,51 +185,42 @@ function startTest(seconds){
     },1000);
 }
 
-function finishTest(){
+function finishTest() {
     clearInterval(timer);
-    started = false;
     input.disabled = true;
-    calculateResults(true);
+    const typedChars = currentIndex;
+    const wpm = typedChars / 5;
+    const accuracy = typedChars ? Math.max(0, Math.floor((typedChars - errors)/typedChars*100)) : 100;
+    resWpm.textContent = wpm;
+    resAcc.textContent = accuracy + "%";
+    resErr.textContent = errors;
+    resultsDiv.style.display = "block";
 }
 
-function calculateResults(showResults=false){
-    const typed = input.value;
-    let correctChars = 0;
-    for(let i=0;i<typed.length;i++){
-        if(typed[i]===fullText[i]) correctChars++;
-        else errors++;
-    }
-    const accuracy = typed.length ? Math.max(0, Math.floor((correctChars/typed.length)*100)) : 100;
-    const wpm = correctChars/5;
-    wpmSpan.textContent = wpm;
-    accSpan.textContent = accuracy + "%";
-    errSpan.textContent = errors;
-    if(showResults){
-        resWpm.textContent = wpm;
-        resAcc.textContent = accuracy + "%";
-        resErr.textContent = errors;
-        resultsDiv.style.display = "block";
-    }
+function restartTest() {
+    generateText();
+    input.disabled = false;
+    input.focus();
 }
 
 input.addEventListener("keydown",(e)=>{
-    if(!started) e.preventDefault();
     if(e.key === "Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
 });
 
 input.addEventListener("input",()=>{
-    if(!started) return;
-    const typedChar = input.value[currentIndex];
-    if(typedChar===fullText[currentIndex]) currentIndex++;
-    else errors++;
+    if(!started) startTimer();
+    const typedChar = input.value[input.value.length-1];
+    if(!typedChar) return;
+    if(typedChar === fullText[currentIndex]) {
+        currentIndex++;
+    } else {
+        errors++;
+        currentIndex++;
+    }
     updateTextDisplay();
     if(currentIndex>=fullText.length) finishTest();
 });
-
-function restartFromResults(){
-    startTest(30);
-    input.focus();
-}
+generateText();
 </script>
 </body>
 </html>
