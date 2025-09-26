@@ -59,17 +59,9 @@ h1::before {
     position: relative;
 }
 
-.topping {
-    position: absolute;
-    font-size: 20px;
-    animation: float 2s linear forwards;
-}
-
-@keyframes float {
-    0% { transform: translateY(0) scale(0.5); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: translateY(-50px) scale(1); opacity: 0; }
-}
+span.correct { color: green; }
+span.current { background: yellow; color: black; }
+span.wrong { color: red; }
 
 input[type="text"] {
     width: 100%;
@@ -103,6 +95,25 @@ button {
 button:hover {
     background: #ffd700;
 }
+
+/* Results popup */
+#results {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff8dc;
+    color: #000;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    display: none;
+    text-align: center;
+}
+#results button {
+    background: #ff6347;
+    color: #fff;
+}
 </style>
 </head>
 <body>
@@ -121,8 +132,15 @@ button:hover {
         <button onclick="startTest(30)">30s</button>
         <button onclick="startTest(60)">60s</button>
         <button onclick="startTest(120)">2min</button>
-        <button onclick="restartTest()">Neu starten</button>
     </div>
+</div>
+
+<div id="results">
+    <h2>Ergebnis</h2>
+    <p>WPM: <span id="resWpm">0</span></p>
+    <p>Accuracy: <span id="resAcc">0%</span></p>
+    <p>Errors: <span id="resErr">0</span></p>
+    <button onclick="restartFromResults()">Neu starten</button>
 </div>
 
 <script>
@@ -130,6 +148,8 @@ const words = ["pizza","käse","tomate","basilikum","teig","stück","ofen","hei�
 let fullText = "";
 let timer, timeLeft;
 let started = false;
+let errors = 0;
+let currentIndex = 0;
 
 const textDiv = document.getElementById("textToType");
 const input = document.getElementById("userInput");
@@ -138,23 +158,28 @@ const accSpan = document.getElementById("accuracy");
 const errSpan = document.getElementById("errors");
 const timeSpan = document.getElementById("time");
 
+const resultsDiv = document.getElementById("results");
+const resWpm = document.getElementById("resWpm");
+const resAcc = document.getElementById("resAcc");
+const resErr = document.getElementById("resErr");
+
 function generateText() {
     fullText = "";
     for(let i=0;i<50;i++){
         fullText += words[Math.floor(Math.random()*words.length)] + " ";
     }
-    textDiv.textContent = fullText.trim();
+    currentIndex = 0;
+    errors = 0;
+    updateTextDisplay();
 }
 
-function addTopping() {
-    const toppingEmojis = ["🧀","🍅","🌿","🍖","🫑"];
-    const topping = document.createElement("div");
-    topping.className = "topping";
-    topping.style.left = Math.random() * (textDiv.clientWidth - 20) + "px";
-    topping.style.top = Math.random() * (textDiv.clientHeight - 20) + "px";
-    topping.textContent = toppingEmojis[Math.floor(Math.random()*toppingEmojis.length)];
-    textDiv.appendChild(topping);
-    setTimeout(()=> topping.remove(), 2000);
+function updateTextDisplay() {
+    const chars = fullText.split('');
+    textDiv.innerHTML = chars.map((c,i)=>{
+        if(i<currentIndex) return `<span class="correct">${c}</span>`;
+        else if(i===currentIndex) return `<span class="current">${c}</span>`;
+        else return `<span>${c}</span>`;
+    }).join('');
 }
 
 function startTest(seconds){
@@ -169,55 +194,62 @@ function startTest(seconds){
     accSpan.textContent = "100%";
     errSpan.textContent = 0;
     started = true;
-}
+    resultsDiv.style.display = "none";
 
-function runTimer(){
     timer = setInterval(()=>{
         timeLeft--;
         timeSpan.textContent = timeLeft;
         if(timeLeft<=0){
-            clearInterval(timer);
-            calculateResults();
-            started = false;
-            input.disabled = true;
+            finishTest();
         }
     },1000);
 }
 
-function restartTest(){
-    startTest(30);
-    runTimer();
+function finishTest(){
+    clearInterval(timer);
+    started = false;
+    input.disabled = true;
+    calculateResults(true);
 }
 
-function calculateResults(){
-    const typed = input.value.trim();
-    const typedWords = typed.split(" ");
-    const originalWords = fullText.trim().split(" ");
-    let correct = 0;
-    let errors = 0;
-    for(let i=0;i<typedWords.length;i++){
-        if(typedWords[i]===originalWords[i]){
-            correct++;
-        } else {
-            errors++;
-        }
+function calculateResults(showResults=false){
+    const typed = input.value;
+    let correctChars = 0;
+    for(let i=0;i<typed.length;i++){
+        if(typed[i]===fullText[i]) correctChars++;
+        else errors++;
     }
-    const accuracy = Math.max(0, Math.floor((correct/typedWords.length)*100));
-    const wpm = correct;
+    const accuracy = typed.length ? Math.max(0, Math.floor((correctChars/typed.length)*100)) : 100;
+    const wpm = correctChars/5;
     wpmSpan.textContent = wpm;
     accSpan.textContent = accuracy + "%";
     errSpan.textContent = errors;
+    if(showResults){
+        resWpm.textContent = wpm;
+        resAcc.textContent = accuracy + "%";
+        resErr.textContent = errors;
+        resultsDiv.style.display = "block";
+    }
 }
 
-// Disable backspace and copy/paste
 input.addEventListener("keydown",(e)=>{
     if(!started) e.preventDefault();
     if(e.key === "Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
 });
+
 input.addEventListener("input",()=>{
     if(!started) return;
-    addTopping(); // animate toppings
+    const typedChar = input.value[currentIndex];
+    if(typedChar===fullText[currentIndex]) currentIndex++;
+    else errors++;
+    updateTextDisplay();
+    if(currentIndex>=fullText.length) finishTest();
 });
+
+function restartFromResults(){
+    startTest(30);
+    input.focus();
+}
 </script>
 </body>
 </html>
