@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -93,7 +93,7 @@ input::placeholder { color:#b22222; }
 <div class="container">
 <h1>PizzaTyper</h1>
 
-<label for="duration">Testdauer (Minuten):</label>
+<label for="duration">Test duration (minutes):</label>
 <select id="duration">
   <option value="1">1</option>
   <option value="2">2</option>
@@ -109,23 +109,23 @@ input::placeholder { color:#b22222; }
 </div>
 
 <div class="text-area" id="textToType"></div>
-<input type="text" id="userInput" placeholder="Tippe hier..." autocomplete="off">
+<input type="text" id="userInput" placeholder="Type here..." autocomplete="off">
 </div>
 
 <div id="results">
-<h2>Ergebnis</h2>
+<h2>Results</h2>
 <p>WPM: <span id="resWpm">0</span></p>
 <p>Accuracy: <span id="resAcc">0%</span></p>
 <p>Errors: <span id="resErr">0</span></p>
-<button onclick="restartTest()">Neu starten</button>
+<button onclick="restartTest()">Restart</button>
 </div>
 
 <script>
 const words = [
-  "pizza","käse","tomate","basilikum","teig","stück","ofen","heiß","lecker",
-  "frisch","knusprig","sauce","würzig","essen","mittag","abend","snack","abendessen",
-  "italienisch","belag","schönwetter","überraschung","kräftig","möglichkeit","fußball","größer","ästhetisch","vergnügen",
-  "züchtig","gänseblümchen","schöngeistig","wissenschaftlich","geschäftlich","verständnisvoll"
+  "pizza","cheese","tomato","basil","dough","slice","oven","hot","tasty",
+  "fresh","crispy","sauce","spicy","food","lunch","dinner","snack","supper",
+  "italian","topping","sunny","surprise","bold","opportunity","soccer","bigger","aesthetic","pleasure",
+  "modest","daisy","artsy","scientific","business","understanding"
 ];
 
 let fullText = "";
