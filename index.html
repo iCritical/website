@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TypeMaster Clone</title>
+<title>PizzaTyper</title>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
     body {
         margin: 0;
-        font-family: 'Roboto Mono', monospace;
-        background: #1e1e2f;
+        font-family: 'Courier Prime', monospace;
+        background: url('https://images.unsplash.com/photo-1601924571827-2a3db8720e12?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+        background-size: cover;
         color: #fff;
         display: flex;
         justify-content: center;
@@ -21,15 +22,16 @@
     .container {
         max-width: 800px;
         width: 100%;
-        background: #2c2c3e;
+        background: rgba(0,0,0,0.7);
         padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.7);
     }
 
     h1 {
         text-align: center;
-        color: #a18fff;
+        color: #ff6347; /* Pizza-Sauce Rot */
+        margin-bottom: 20px;
     }
 
     .stats {
@@ -40,7 +42,7 @@
     }
 
     .text-area {
-        background: #1e1e2f;
+        background: rgba(255, 255, 255, 0.1);
         padding: 15px;
         min-height: 150px;
         border-radius: 10px;
@@ -59,6 +61,12 @@
         border: none;
         outline: none;
         margin-bottom: 20px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+    }
+
+    input::placeholder {
+        color: #ffdab9;
     }
 
     button {
@@ -67,17 +75,21 @@
         border-radius: 10px;
         border: none;
         cursor: pointer;
-        background: #a18fff;
-        color: #1e1e2f;
+        background: #ff6347;
+        color: #fff;
         font-weight: bold;
         margin-right: 5px;
+        transition: 0.3s;
     }
 
+    button:hover {
+        background: #ff4500;
+    }
 </style>
 </head>
 <body>
 <div class="container">
-    <h1>TypeMaster Clone</h1>
+    <h1>PizzaTyper</h1>
     <div class="stats">
         <div>WPM: <span id="wpm">0</span></div>
         <div>Accuracy: <span id="accuracy">100%</span></div>
@@ -95,7 +107,7 @@
 </div>
 
 <script>
-const words = ["internet","children","technology","knowledge","communication","professional","everything","group","understand","different","mother","time","play","young","answer","always","use","better","way","make","must","should","interest","really","now"];
+const words = ["pizza","cheese","tomato","basil","crust","slice","pepperoni","olive","dough","sauce","oven","hot","delicious","fresh","tasty","bite","cheesy","slice","spicy","yum"];
 let fullText = "";
 let timer, timeLeft;
 let started = false;
@@ -134,6 +146,7 @@ function startTest(seconds){
             clearInterval(timer);
             calculateResults();
             started = false;
+            input.disabled = true;
         }
     },1000);
 }
@@ -158,9 +171,9 @@ function calculateResults(){
     errSpan.textContent = errors;
 }
 
+// Keine Korrektur während dem Tippen
 input.addEventListener("input",()=>{
     if(!started) return;
-    calculateResults();
 });
 </script>
 </body>
