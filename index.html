@@ -3,108 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pizza Post Typing Game</title>
+<title>TypeMaster Clone</title>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
     body {
         margin: 0;
-        height: 100vh;
+        font-family: 'Roboto Mono', monospace;
+        background: #1e1e2f;
+        color: #fff;
         display: flex;
         justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #ff7f50, #ff4500);
-        font-family: 'Roboto Mono', monospace;
-        color: #fff;
+        align-items: flex-start;
+        padding-top: 50px;
     }
 
     .container {
-        background: rgba(0,0,0,0.5);
-        padding: 30px;
-        border-radius: 20px;
-        text-align: center;
         max-width: 800px;
+        width: 100%;
+        background: #2c2c3e;
+        padding: 30px;
+        border-radius: 15px;
         box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
 
-    .typewriter-text {
-        font-size: 1.5em;
+    h1 {
+        text-align: center;
+        color: #a18fff;
+    }
+
+    .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+        font-size: 1.2em;
+    }
+
+    .text-area {
+        background: #1e1e2f;
+        padding: 15px;
+        min-height: 150px;
+        border-radius: 10px;
         margin-bottom: 20px;
         white-space: pre-wrap;
+        font-size: 1.2em;
+        line-height: 1.5;
+        overflow-y: auto;
     }
 
     input[type="text"] {
-        width: 90%;
+        width: 100%;
         padding: 10px;
         font-size: 1.2em;
         border-radius: 10px;
         border: none;
         outline: none;
+        margin-bottom: 20px;
     }
 
     button {
-        margin-top: 20px;
         padding: 10px 20px;
-        font-size: 1.2em;
+        font-size: 1em;
         border-radius: 10px;
         border: none;
         cursor: pointer;
-        background: #fff;
-        color: #ff4500;
+        background: #a18fff;
+        color: #1e1e2f;
         font-weight: bold;
+        margin-right: 5px;
     }
 
-    .results {
-        margin-top: 20px;
-        font-size: 1.2em;
-    }
 </style>
 </head>
 <body>
 <div class="container">
-    <h1>Pizza Post Typing Game</h1>
-    <div class="typewriter-text" id="textToType"></div>
+    <h1>TypeMaster Clone</h1>
+    <div class="stats">
+        <div>WPM: <span id="wpm">0</span></div>
+        <div>Accuracy: <span id="accuracy">100%</span></div>
+        <div>Errors: <span id="errors">0</span></div>
+        <div>Time: <span id="time">30</span>s</div>
+    </div>
+    <div class="text-area" id="textToType"></div>
     <input type="text" id="userInput" placeholder="Tippe hier..." autocomplete="off">
-    <br>
-    <button onclick="checkTyping()">Abschicken</button>
-    <div class="results" id="results"></div>
+    <div>
+        <button onclick="startTest(15)">15s</button>
+        <button onclick="startTest(30)">30s</button>
+        <button onclick="startTest(60)">60s</button>
+        <button onclick="startTest(120)">2min</button>
+    </div>
 </div>
 
 <script>
-    const sentences = [
-        "Willkommen bei Pizza Post!",
-        "Hier kannst du deine Typing-Fähigkeiten testen.",
-        "Viel Spaß beim Schreiben und Tippen!",
-        "Tippe den Text so schnell und genau wie möglich."
-    ];
+const words = ["internet","children","technology","knowledge","communication","professional","everything","group","understand","different","mother","time","play","young","answer","always","use","better","way","make","must","should","interest","really","now"];
+let fullText = "";
+let timer, timeLeft;
+let started = false;
 
-    // Zufälligen Satz auswählen
-    const textToType = sentences[Math.floor(Math.random() * sentences.length)];
-    const textDiv = document.getElementById("textToType");
-    textDiv.innerHTML = "";
+const textDiv = document.getElementById("textToType");
+const input = document.getElementById("userInput");
+const wpmSpan = document.getElementById("wpm");
+const accSpan = document.getElementById("accuracy");
+const errSpan = document.getElementById("errors");
+const timeSpan = document.getElementById("time");
 
-    // Typewriter-Animation
-    let i = 0;
-    function typeWriter() {
-        if (i < textToType.length) {
-            textDiv.innerHTML += textToType.charAt(i);
-            i++;
-            setTimeout(typeWriter, 80);
+function generateText() {
+    fullText = "";
+    for(let i=0;i<50;i++){
+        fullText += words[Math.floor(Math.random()*words.length)] + " ";
+    }
+    textDiv.textContent = fullText.trim();
+}
+
+function startTest(seconds){
+    clearInterval(timer);
+    generateText();
+    input.value = "";
+    input.focus();
+    timeLeft = seconds;
+    timeSpan.textContent = timeLeft;
+    wpmSpan.textContent = 0;
+    accSpan.textContent = "100%";
+    errSpan.textContent = 0;
+    started = true;
+
+    timer = setInterval(()=>{
+        timeLeft--;
+        timeSpan.textContent = timeLeft;
+        if(timeLeft<=0){
+            clearInterval(timer);
+            calculateResults();
+            started = false;
+        }
+    },1000);
+}
+
+function calculateResults(){
+    const typed = input.value.trim();
+    const typedWords = typed.split(" ");
+    const originalWords = fullText.trim().split(" ");
+    let correct = 0;
+    let errors = 0;
+    for(let i=0;i<typedWords.length;i++){
+        if(typedWords[i]===originalWords[i]){
+            correct++;
+        } else {
+            errors++;
         }
     }
-    window.onload = typeWriter;
+    const accuracy = Math.max(0, Math.floor((correct/typedWords.length)*100));
+    const wpm = correct;
+    wpmSpan.textContent = wpm;
+    accSpan.textContent = accuracy + "%";
+    errSpan.textContent = errors;
+}
 
-    // Eingabe überprüfen
-    function checkTyping() {
-        const userInput = document.getElementById("userInput").value;
-        let correct = 0;
-        for (let j = 0; j < Math.min(userInput.length, textToType.length); j++) {
-            if (userInput[j] === textToType[j]) correct++;
-        }
-        const errors = textToType.length - correct;
-        document.getElementById("results").innerHTML = 
-            `Richtige Buchstaben: ${correct} <br> Fehler: ${errors} <br> Genauigkeit: ${((correct/textToType.length)*100).toFixed(2)}%`;
-    }
+input.addEventListener("input",()=>{
+    if(!started) return;
+    calculateResults();
+});
 </script>
 </body>
 </html>
