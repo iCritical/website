@@ -15,7 +15,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* full viewport height */
+  height: 100vh;
 }
 
 .container {
@@ -50,7 +50,7 @@ span.correct { color:green; }
 span.current { background:yellow; color:black; }
 span.wrong { color:red; }
 
-input[type="text"] {
+input[type="text"], select {
   width:100%;
   padding:10px;
   font-size:1.2em;
@@ -92,12 +92,22 @@ input::placeholder { color:#b22222; }
 <body>
 <div class="container">
 <h1>PizzaTyper</h1>
+
+<label for="duration">Testdauer (Minuten):</label>
+<select id="duration">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="5">5</option>
+</select>
+
 <div class="stats">
   <div>WPM: <span id="wpm">0</span></div>
   <div>Accuracy: <span id="accuracy">100%</span></div>
   <div>Errors: <span id="errors">0</span></div>
   <div>Time: <span id="time">30</span>s</div>
 </div>
+
 <div class="text-area" id="textToType"></div>
 <input type="text" id="userInput" placeholder="Tippe hier..." autocomplete="off">
 </div>
@@ -111,13 +121,18 @@ input::placeholder { color:#b22222; }
 </div>
 
 <script>
-const words = ["pizza","käse","tomate","basilikum","teig","stück","ofen","heiß","lecker","frisch","knusprig","sauce","würzig","essen","mittag","abend","snack","abendessen","italienisch","belag"];
+const words = [
+  "pizza","käse","tomate","basilikum","teig","stück","ofen","heiß","lecker",
+  "frisch","knusprig","sauce","würzig","essen","mittag","abend","snack","abendessen",
+  "italienisch","belag","schönwetter","überraschung","kräftig","möglichkeit","fußball","größer","ästhetisch","vergnügen",
+  "züchtig","gänseblümchen","schöngeistig","wissenschaftlich","geschäftlich","verständnisvoll"
+];
+
 let fullText = "";
 let typed = [];
 let currentIndex = 0;
 let errors = 0;
 let timer, timeLeft, started=false;
-const totalTime = 30;
 
 const textDiv = document.getElementById("textToType");
 const input = document.getElementById("userInput");
@@ -125,6 +140,7 @@ const wpmSpan = document.getElementById("wpm");
 const accSpan = document.getElementById("accuracy");
 const errSpan = document.getElementById("errors");
 const timeSpan = document.getElementById("time");
+const durationSelect = document.getElementById("duration");
 
 const resultsDiv = document.getElementById("results");
 const resWpm = document.getElementById("resWpm");
@@ -133,12 +149,12 @@ const resErr = document.getElementById("resErr");
 
 function generateText() {
   fullText = "";
-  for(let i=0;i<50;i++) fullText += words[Math.floor(Math.random()*words.length)] + " ";
+  for(let i=0;i<100;i++) fullText += words[Math.floor(Math.random()*words.length)] + " ";
   fullText = fullText.trim();
   typed = [];
   currentIndex = 0;
   errors = 0;
-  timeLeft = totalTime;
+  timeLeft = durationSelect.value * 60;
   started = false;
   input.value="";
   input.disabled=false;
@@ -146,7 +162,7 @@ function generateText() {
   wpmSpan.textContent="0";
   accSpan.textContent="100%";
   errSpan.textContent="0";
-  timeSpan.textContent=totalTime;
+  timeSpan.textContent=timeLeft;
   resultsDiv.style.display="none";
 }
 
@@ -180,7 +196,7 @@ function startTimer() {
 function finishTest() {
   clearInterval(timer);
   input.disabled=true;
-  const wpm = Math.floor(typed.length/5);
+  const wpm = Math.floor(typed.length/5 / (durationSelect.value));
   const accuracy = typed.length ? Math.floor((typed.length - errors)/typed.length*100) : 100;
   resWpm.textContent = wpm;
   resAcc.textContent = accuracy+"%";
@@ -213,6 +229,9 @@ input.addEventListener("input", ()=>{
 
   if(currentIndex>=fullText.length) finishTest();
 });
+
+// Regenerate text if duration changes
+durationSelect.addEventListener("change", generateText);
 
 // Initialize
 generateText();
