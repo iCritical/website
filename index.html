@@ -10,21 +10,23 @@
 body {
     margin: 0;
     font-family: 'Courier Prime', monospace;
-    background: #ffe5b4; /* Pizza dough color */
+    background: #ffe5b4; /* pizza dough color */
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding-top: 50px;
+    overflow-x: hidden;
 }
 
 .container {
     max-width: 800px;
     width: 100%;
-    background: #ff6347; /* Tomato sauce red */
+    background: #ff6347; /* tomato sauce red */
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
     color: #fff;
+    position: relative;
 }
 
 h1 {
@@ -44,7 +46,7 @@ h1::before {
 }
 
 .text-area {
-    background: #fff8dc; /* Cheese color */
+    background: #fff8dc; /* cheese color */
     padding: 15px;
     min-height: 150px;
     border-radius: 10px;
@@ -54,6 +56,19 @@ h1::before {
     line-height: 1.5;
     overflow-y: auto;
     color: #000;
+    position: relative;
+}
+
+.topping {
+    position: absolute;
+    font-size: 20px;
+    animation: float 2s linear forwards;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-50px) scale(1); opacity: 0; }
 }
 
 input[type="text"] {
@@ -78,7 +93,7 @@ button {
     border-radius: 10px;
     border: none;
     cursor: pointer;
-    background: #ffcc00; /* Pepperoni yellow */
+    background: #ffcc00;
     color: #000;
     font-weight: bold;
     margin-right: 5px;
@@ -131,6 +146,17 @@ function generateText() {
     textDiv.textContent = fullText.trim();
 }
 
+function addTopping() {
+    const toppingEmojis = ["🧀","🍅","🌿","🍖","🫑"];
+    const topping = document.createElement("div");
+    topping.className = "topping";
+    topping.style.left = Math.random() * (textDiv.clientWidth - 20) + "px";
+    topping.style.top = Math.random() * (textDiv.clientHeight - 20) + "px";
+    topping.textContent = toppingEmojis[Math.floor(Math.random()*toppingEmojis.length)];
+    textDiv.appendChild(topping);
+    setTimeout(()=> topping.remove(), 2000);
+}
+
 function startTest(seconds){
     clearInterval(timer);
     generateText();
@@ -143,7 +169,9 @@ function startTest(seconds){
     accSpan.textContent = "100%";
     errSpan.textContent = 0;
     started = true;
+}
 
+function runTimer(){
     timer = setInterval(()=>{
         timeLeft--;
         timeSpan.textContent = timeLeft;
@@ -158,6 +186,7 @@ function startTest(seconds){
 
 function restartTest(){
     startTest(30);
+    runTimer();
 }
 
 function calculateResults(){
@@ -180,10 +209,14 @@ function calculateResults(){
     errSpan.textContent = errors;
 }
 
-// Keine Korrektur während dem Tippen
+// Disable backspace and copy/paste
 input.addEventListener("keydown",(e)=>{
     if(!started) e.preventDefault();
-    if(e.key === "Backspace") e.preventDefault(); // keine Korrektur
+    if(e.key === "Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
+});
+input.addEventListener("input",()=>{
+    if(!started) return;
+    addTopping(); // animate toppings
 });
 </script>
 </body>
