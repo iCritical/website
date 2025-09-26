@@ -3,15 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizza Post Plinko</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Pizza Post</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff7f50, #ff4500);
+            font-family: 'Roboto Mono', monospace;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .typewriter {
+            font-size: 1.8em;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid #fff;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: #fff; }
+        }
+
+        .subtitle {
+            margin-top: 20px;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Pizza Post Plinko Game</h1>
-    <p>Viel Spaß beim Spielen!</p>
-    <img src="board.png" alt="Plinko Board">
-    
-    <script src="jquery.js"></script>
-    <script src="plinko.js"></script>
+    <div class="container">
+        <div class="typewriter" id="typewriter"></div>
+        <div class="subtitle">Dein Typing-Abenteuer beginnt hier 🍕</div>
+    </div>
+
+    <script>
+        const sentences = [
+            "Willkommen bei Pizza Post!",
+            "Hier kannst du deine eigene Plinko-Seite entdecken.",
+            "Viel Spaß beim Stöbern und Spielen!"
+        ];
+
+        const typeSpeed = 80;
+        const sentenceDelay = 1000;
+        let i = 0, j = 0;
+        const writer = document.getElementById("typewriter");
+
+        function typeWriter() {
+            if (i < sentences.length) {
+                if (j < sentences[i].length) {
+                    writer.innerHTML += sentences[i].charAt(j);
+                    j++;
+                    setTimeout(typeWriter, typeSpeed);
+                } else {
+                    writer.innerHTML += "<br>";
+                    i++;
+                    j = 0;
+                    setTimeout(typeWriter, sentenceDelay);
+                }
+            }
+        }
+
+        window.onload = typeWriter;
+    </script>
 </body>
 </html>
