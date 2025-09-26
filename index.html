@@ -7,31 +7,89 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
-body { margin:0; font-family:'Courier Prime', monospace; background:#ffe5b4; display:flex; justify-content:center; align-items:flex-start; padding-top:50px;}
-.container { max-width:800px; width:100%; background:#ff6347; padding:30px; border-radius:20px; box-shadow:0 0 20px rgba(0,0,0,0.5); color:#fff; position:relative;}
-h1 { text-align:center; margin-bottom:20px; font-size:2em;}
+body {
+  margin:0;
+  font-family:'Courier Prime', monospace;
+  background:#ffe5b4;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:50px;
+}
+
+.container {
+  max-width:800px;
+  width:100%;
+  background:#ff6347;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 0 20px rgba(0,0,0,0.5);
+  color:#fff;
+}
+
+h1 { text-align:center; margin-bottom:20px; font-size:2em; }
 h1::before { content:"🍕 "; }
-.stats { display:flex; justify-content:space-around; margin-bottom:20px; font-size:1.2em;}
-.text-area { background:#fff8dc; padding:15px; min-height:150px; border-radius:10px; margin-bottom:20px; white-space:pre-wrap; font-size:1.2em; line-height:1.5; overflow-y:auto; color:#000; position:relative;}
+
+.stats { display:flex; justify-content:space-around; margin-bottom:20px; font-size:1.2em; }
+
+.text-area {
+  background:#fff8dc;
+  padding:15px;
+  min-height:150px;
+  border-radius:10px;
+  margin-bottom:20px;
+  white-space:pre-wrap;
+  font-size:1.2em;
+  line-height:1.5;
+  overflow-y:auto;
+  color:#000;
+}
+
 span.correct { color:green; }
 span.current { background:yellow; color:black; }
 span.wrong { color:red; }
-input[type="text"] { width:100%; padding:10px; font-size:1.2em; border-radius:10px; border:none; outline:none; margin-bottom:20px; background:#fff8dc; color:#000;}
+
+input[type="text"] {
+  width:100%;
+  padding:10px;
+  font-size:1.2em;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  margin-bottom:20px;
+  background:#fff8dc;
+  color:#000;
+}
+
 input::placeholder { color:#b22222; }
-button { padding:10px 20px; font-size:1em; border-radius:10px; border:none; cursor:pointer; background:#ffcc00; color:#000; font-weight:bold; margin-right:5px; transition:0.3s;}
-button:hover { background:#ffd700; }
-#results { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff8dc; color:#000; padding:30px; border-radius:15px; box-shadow:0 0 20px rgba(0,0,0,0.7); display:none; text-align:center;}
-#results button { background:#ff6347; color:#fff; }
+
+#results {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff8dc;
+  color:#000;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,0,0,0.7);
+  display:none;
+  text-align:center;
+}
+
+#results button { background:#ff6347; color:#fff; padding:10px 20px; border:none; border-radius:10px; cursor:pointer; margin-top:10px; }
+
+button { display:none; } /* hide buttons for simplicity */
 </style>
 </head>
 <body>
 <div class="container">
 <h1>PizzaTyper</h1>
 <div class="stats">
-<div>WPM: <span id="wpm">0</span></div>
-<div>Accuracy: <span id="accuracy">100%</span></div>
-<div>Errors: <span id="errors">0</span></div>
-<div>Time: <span id="time">30</span>s</div>
+  <div>WPM: <span id="wpm">0</span></div>
+  <div>Accuracy: <span id="accuracy">100%</span></div>
+  <div>Errors: <span id="errors">0</span></div>
+  <div>Time: <span id="time">30</span>s</div>
 </div>
 <div class="text-area" id="textToType"></div>
 <input type="text" id="userInput" placeholder="Tippe hier..." autocomplete="off">
@@ -48,99 +106,108 @@ button:hover { background:#ffd700; }
 <script>
 const words = ["pizza","käse","tomate","basilikum","teig","stück","ofen","heiß","lecker","frisch","knusprig","sauce","würzig","essen","mittag","abend","snack","abendessen","italienisch","belag"];
 let fullText = "";
+let typed = [];
+let currentIndex = 0;
+let errors = 0;
 let timer, timeLeft, started=false;
-let typedChars=0, errors=0;
-
 const totalTime = 30;
+
 const textDiv = document.getElementById("textToType");
 const input = document.getElementById("userInput");
 const wpmSpan = document.getElementById("wpm");
 const accSpan = document.getElementById("accuracy");
 const errSpan = document.getElementById("errors");
+const timeSpan = document.getElementById("time");
 
 const resultsDiv = document.getElementById("results");
 const resWpm = document.getElementById("resWpm");
 const resAcc = document.getElementById("resAcc");
 const resErr = document.getElementById("resErr");
 
-function generateText(){
-    fullText = "";
-    for(let i=0;i<50;i++) fullText += words[Math.floor(Math.random()*words.length)] + " ";
-    fullText = fullText.trim();
-    typedChars=0;
-    errors=0;
-    timeLeft=totalTime;
-    started=false;
-    input.value="";
-    input.disabled=false;
-    resultsDiv.style.display="none";
-    updateDisplay();
-    wpmSpan.textContent="0";
-    accSpan.textContent="100%";
-    errSpan.textContent="0";
-    document.getElementById("time").textContent=totalTime;
+function generateText() {
+  fullText = "";
+  for(let i=0;i<50;i++) fullText += words[Math.floor(Math.random()*words.length)] + " ";
+  fullText = fullText.trim();
+  typed = [];
+  currentIndex = 0;
+  errors = 0;
+  timeLeft = totalTime;
+  started = false;
+  input.value="";
+  input.disabled=false;
+  updateDisplay();
+  wpmSpan.textContent="0";
+  accSpan.textContent="100%";
+  errSpan.textContent="0";
+  timeSpan.textContent=totalTime;
+  resultsDiv.style.display="none";
 }
 
-function updateDisplay(){
-    const chars = fullText.split('');
-    let html = "";
-    for(let i=0;i<chars.length;i++){
-        if(i<typedChars-errors) html += `<span class="correct">${chars[i]}</span>`;
-        else if(i===typedChars) html += `<span class="current">${chars[i]}</span>`;
-        else html += `<span>${chars[i]}</span>`;
+function updateDisplay() {
+  textDiv.innerHTML = "";
+  for(let i=0;i<fullText.length;i++) {
+    let span = document.createElement("span");
+    if(i < typed.length) {
+      span.textContent = fullText[i];
+      span.className = typed[i] === fullText[i] ? "correct" : "wrong";
+    } else if(i===typed.length) {
+      span.textContent = fullText[i];
+      span.className = "current";
+    } else {
+      span.textContent = fullText[i];
     }
-    textDiv.innerHTML=html;
+    textDiv.appendChild(span);
+  }
 }
 
-function startTimer(){
-    if(started) return;
-    started=true;
-    timer=setInterval(()=>{
-        timeLeft--;
-        document.getElementById("time").textContent=timeLeft;
-        if(timeLeft<=0) finishTest();
-    },1000);
+function startTimer() {
+  if(started) return;
+  started = true;
+  timer = setInterval(()=>{
+    timeLeft--;
+    timeSpan.textContent = timeLeft;
+    if(timeLeft<=0) finishTest();
+  },1000);
 }
 
-function finishTest(){
-    clearInterval(timer);
-    input.disabled=true;
-    const wpm = typedChars/5;
-    const accuracy = typedChars ? Math.max(0, Math.floor((typedChars-errors)/typedChars*100)) : 100;
-    resWpm.textContent=wpm;
-    resAcc.textContent=accuracy+"%";
-    resErr.textContent=errors;
-    resultsDiv.style.display="block";
+function finishTest() {
+  clearInterval(timer);
+  input.disabled=true;
+  const wpm = Math.floor(typed.length/5);
+  const accuracy = typed.length ? Math.floor((typed.length - errors)/typed.length*100) : 100;
+  resWpm.textContent = wpm;
+  resAcc.textContent = accuracy+"%";
+  resErr.textContent = errors;
+  resultsDiv.style.display="block";
 }
 
-function restartTest(){
-    generateText();
-    input.focus();
+function restartTest() {
+  generateText();
+  input.focus();
 }
 
 input.addEventListener("keydown",(e)=>{
-    if(e.key==="Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
+  if(e.key==="Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
 });
 
-input.addEventListener("input",()=>{
-    if(!started) startTimer();
-    const value=input.value;
-    const char=value[value.length-1];
-    if(char===undefined) return;
+input.addEventListener("input", ()=>{
+  if(!started) startTimer();
+  const char = input.value[input.value.length-1];
+  if(char === undefined) return;
 
-    if(char===fullText[typedChars]) typedChars++;
-    else { typedChars++; errors++; }
+  typed.push(char);
+  if(char !== fullText[currentIndex]) errors++;
+  currentIndex++;
+  updateDisplay();
+  wpmSpan.textContent = Math.floor(typed.length/5);
+  const accuracy = typed.length ? Math.floor((typed.length-errors)/typed.length*100) : 100;
+  accSpan.textContent = accuracy+"%";
+  errSpan.textContent = errors;
 
-    wpmSpan.textContent = Math.floor(typedChars/5);
-    const accuracy = typedChars ? Math.max(0, Math.floor((typedChars-errors)/typedChars*100)) : 100;
-    accSpan.textContent = accuracy+"%";
-    errSpan.textContent = errors;
-
-    updateDisplay();
-
-    if(typedChars>=fullText.length) finishTest();
+  if(currentIndex>=fullText.length) finishTest();
 });
 
+// Initialize
 generateText();
 </script>
 </body>
