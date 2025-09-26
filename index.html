@@ -1,241 +1,1152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PizzaTyper</title>
-<link rel="icon" href="pizza.png" type="image/png">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Clicker - The Ultimate Pizza Empire</title>
+    <link rel="icon" type="image/x-icon" href="pizza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-body {
-  margin: 0;
-  font-family: 'Courier Prime', monospace;
-  background: #ffe5b4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+        body {
+            font-family: 'Fredoka', cursive;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-.container {
-  max-width: 800px;
-  width: 100%;
-  background: #ff6347;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  color: #fff;
-}
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
 
-h1 { text-align:center; margin-bottom:20px; font-size:2em; }
-h1::before { content:"🍕 "; }
+        .floating-pizza {
+            position: fixed;
+            font-size: 30px;
+            animation: float 15s infinite linear;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.1;
+        }
 
-.stats { display:flex; justify-content:space-around; margin-bottom:20px; font-size:1.2em; }
+        @keyframes float {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            to {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
 
-.text-area {
-  background:#fff8dc;
-  padding:15px;
-  min-height:150px;
-  border-radius:10px;
-  margin-bottom:20px;
-  white-space:pre-wrap;
-  font-size:1.2em;
-  line-height:1.5;
-  overflow-y:auto;
-  color:#000;
-}
+        .game-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 20px;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
 
-span.correct { color:green; }
-span.current { background:yellow; color:black; }
-span.wrong { color:red; }
+        .main-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 40px);
+        }
 
-input[type="text"], select {
-  width:100%;
-  padding:10px;
-  font-size:1.2em;
-  border-radius:10px;
-  border:none;
-  outline:none;
-  margin-bottom:20px;
-  background:#fff8dc;
-  color:#000;
-}
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.5s ease-out;
+        }
 
-input::placeholder { color:#b22222; }
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
 
-#results {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:#fff8dc;
-  color:#000;
-  padding:30px;
-  border-radius:15px;
-  box-shadow:0 0 20px rgba(0,0,0,0.7);
-  display:none;
-  text-align:center;
-}
+        h1 {
+            font-size: 4rem;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
 
-#results button {
-  background:#ff6347;
-  color:#fff;
-  padding:10px 20px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  margin-top:10px;
-}
-</style>
+        .pizza-count {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: inline-block;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        #pizzaCount {
+            font-size: 2.5rem;
+            color: #764ba2;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .per-second {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .pizza-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        #pizzaButton {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #ffa500, #ff8c00);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.3),
+                inset 0 -10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            animation: pulse 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 150px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        #pizzaButton:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                0 25px 60px rgba(0,0,0,0.4),
+                inset 0 -10px 30px rgba(0,0,0,0.2);
+        }
+
+        #pizzaButton:active {
+            transform: scale(0.95);
+        }
+
+        .click-effect {
+            position: absolute;
+            color: #fff;
+            font-size: 2rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: rise 1s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .shop-section {
+            flex: 0 0 400px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .shop-header {
+            font-size: 2rem;
+            color: #764ba2;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .shop-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .shop-tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(118, 75, 162, 0.2);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #764ba2;
+            transition: all 0.3s;
+        }
+
+        .shop-tab.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        .upgrade-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .upgrade-item:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            opacity: 0.95;
+        }
+
+        .upgrade-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #868686 0%, #5a5a5a 100%);
+        }
+
+        .upgrade-item.locked:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            opacity: 0.6;
+        }
+
+        .upgrade-name {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-cost {
+            font-size: 1.1rem;
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        .upgrade-owned {
+            float: right;
+            background: rgba(255,255,255,0.3);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .upgrade-effect {
+            font-size: 0.9rem;
+            color: #fff;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .save-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .save-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-item {
+            color: #fff;
+            margin: 8px 0;
+            font-size: 1.1rem;
+        }
+
+        .achievement {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            transform: translateX(-400px);
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            z-index: 1001;
+            text-align: left;
+            animation: achievementSlide 0.5s forwards;
+            max-width: 280px;
+            border: 3px solid #fff;
+            margin-bottom: 10px;
+        }
+
+        .achievement:nth-child(n+2) {
+            animation-delay: 0.1s;
+        }
+
+        .achievement:nth-child(n+3) {
+            animation-delay: 0.2s;
+        }
+
+        .achievement:nth-child(n+4) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes achievementSlide {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .achievement h3 {
+            color: #764ba2;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .achievement p {
+            color: #667eea;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .credits {
+            position: fixed;
+            bottom: 10px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            z-index: 100;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .shop-section {
+                flex: 1;
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            #pizzaButton {
+                width: 250px;
+                height: 250px;
+                font-size: 120px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<h1>PizzaTyper</h1>
+    <div class="game-container">
+        <div class="main-section">
+            <div class="header">
+                <h1>🍕 Pizza Clicker 🍕</h1>
+                <div class="pizza-count">
+                    <div id="pizzaCount">0 pizzas</div>
+                    <div class="per-second" id="perSecond">per second: 0</div>
+                </div>
+            </div>
+            
+            <div class="pizza-container">
+                <button id="pizzaButton">🍕</button>
+            </div>
 
-<label for="duration">Test duration (minutes):</label>
-<select id="duration">
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="5">5</option>
-</select>
+            <div class="stats-section">
+                <div class="stat-item">Total Clicks: <span id="totalClicks">0</span></div>
+                <div class="stat-item">Total Pizzas Earned: <span id="totalEarned">0</span></div>
+                <div class="stat-item">Click Power: <span id="clickPower">1</span></div>
+            </div>
+        </div>
 
-<div class="stats">
-  <div>WPM: <span id="wpm">0</span></div>
-  <div>Accuracy: <span id="accuracy">100%</span></div>
-  <div>Errors: <span id="errors">0</span></div>
-  <div>Time: <span id="time">30</span>s</div>
-</div>
+        <div class="shop-section">
+            <h2 class="shop-header">🏪 Pizza Shop 🏪</h2>
+            
+            <div class="shop-tabs">
+                <button class="shop-tab active" onclick="switchTab('buildings')">Buildings</button>
+                <button class="shop-tab" onclick="switchTab('upgrades')">Upgrades</button>
+            </div>
+            
+            <div id="buildingsTab">
+                <div id="shopItems"></div>
+            </div>
+            
+            <div id="upgradesTab" style="display: none;">
+                <div id="clickUpgrades"></div>
+            </div>
+        </div>
+    </div>
 
-<div class="text-area" id="textToType"></div>
-<input type="text" id="userInput" placeholder="Type here..." autocomplete="off">
-</div>
+    <div class="save-buttons">
+        <button class="save-btn" onclick="saveGame()">💾 Save Game</button>
+        <button class="save-btn" onclick="resetGame()">🔄 Reset Game</button>
+    </div>
 
-<div id="results">
-<h2>Results</h2>
-<p>WPM: <span id="resWpm">0</span></p>
-<p>Accuracy: <span id="resAcc">0%</span></p>
-<p>Errors: <span id="resErr">0</span></p>
-<button onclick="restartTest()">Restart</button>
-</div>
+    <div id="notification" class="notification">Game Saved!</div>
+    
+    <div class="credits">coded by rizzyjulian</div>
 
-<script>
-const words = [
-  "pizza","cheese","tomato","basil","dough","slice","oven","hot","tasty",
-  "fresh","crispy","sauce","spicy","food","lunch","dinner","snack","supper",
-  "italian","topping","sunny","surprise","bold","opportunity","soccer","bigger","aesthetic","pleasure",
-  "modest","daisy","artsy","scientific","business","understanding"
-];
+    <script>
+        // Game state
+        let gameState = {
+            pizzas: 0,
+            pizzasPerSecond: 0,
+            pizzasPerClick: 1,
+            totalClicks: 0,
+            totalEarned: 0,
+            buildings: {},
+            clickUpgrades: {},
+            achievements: [],
+            lastSave: Date.now()
+        };
 
-let fullText = "";
-let typed = [];
-let currentIndex = 0;
-let errors = 0;
-let timer, timeLeft, started=false;
+        // Buildings configuration
+        const buildings = [
+            {
+                id: 'cursor',
+                name: 'Auto Clicker',
+                baseCost: 15,
+                baseProduction: 0.1,
+                icon: '👆',
+                description: 'Automatically clicks the pizza every second'
+            },
+            {
+                id: 'grandma',
+                name: 'Pizza Grandma',
+                baseCost: 100,
+                baseProduction: 1,
+                icon: '👵',
+                description: 'A nice grandma to make pizzas'
+            },
+            {
+                id: 'oven',
+                name: 'Pizza Oven',
+                baseCost: 1100,
+                baseProduction: 8,
+                icon: '🔥',
+                description: 'Professional pizza oven'
+            },
+            {
+                id: 'restaurant',
+                name: 'Pizza Restaurant',
+                baseCost: 12000,
+                baseProduction: 47,
+                icon: '🏪',
+                description: 'Your own pizza restaurant'
+            },
+            {
+                id: 'factory',
+                name: 'Pizza Factory',
+                baseCost: 130000,
+                baseProduction: 260,
+                icon: '🏭',
+                description: 'Mass production of pizzas'
+            },
+            {
+                id: 'mine',
+                name: 'Cheese Mine',
+                baseCost: 1400000,
+                baseProduction: 1400,
+                icon: '⛏️',
+                description: 'Mine premium cheese underground'
+            },
+            {
+                id: 'spaceship',
+                name: 'Space Pizzeria',
+                baseCost: 20000000,
+                baseProduction: 7800,
+                icon: '🚀',
+                description: 'Deliver pizzas to space'
+            },
+            {
+                id: 'portal',
+                name: 'Pizza Portal',
+                baseCost: 330000000,
+                baseProduction: 44000,
+                icon: '🌀',
+                description: 'Open portals to the pizza dimension'
+            },
+            {
+                id: 'timemachine',
+                name: 'Time Machine',
+                baseCost: 5100000000,
+                baseProduction: 260000,
+                icon: '⏰',
+                description: 'Bring pizzas from the past'
+            },
+            {
+                id: 'antimatter',
+                name: 'Antimatter Condenser',
+                baseCost: 75000000000,
+                baseProduction: 1600000,
+                icon: '⚛️',
+                description: 'Convert antimatter into pizzas'
+            }
+        ];
 
-const textDiv = document.getElementById("textToType");
-const input = document.getElementById("userInput");
-const wpmSpan = document.getElementById("wpm");
-const accSpan = document.getElementById("accuracy");
-const errSpan = document.getElementById("errors");
-const timeSpan = document.getElementById("time");
-const durationSelect = document.getElementById("duration");
+        // Click upgrades configuration
+        const clickUpgradesConfig = [
+            {
+                id: 'reinforced_hands',
+                name: 'Reinforced Hands',
+                cost: 100,
+                multiplier: 2,
+                description: 'Double your clicking power!'
+            },
+            {
+                id: 'golden_touch',
+                name: 'Golden Touch',
+                cost: 1000,
+                multiplier: 2,
+                description: 'Each click is worth twice as much'
+            },
+            {
+                id: 'pizza_power',
+                name: 'Pizza Power',
+                cost: 10000,
+                multiplier: 3,
+                description: 'Triple click power with pizza energy'
+            },
+            {
+                id: 'quantum_fingers',
+                name: 'Quantum Fingers',
+                cost: 100000,
+                multiplier: 5,
+                description: 'Quantum mechanics enhance your clicking'
+            },
+            {
+                id: 'divine_touch',
+                name: 'Divine Touch',
+                cost: 1000000,
+                multiplier: 10,
+                description: 'The gods bless your clicking ability'
+            }
+        ];
 
-const resultsDiv = document.getElementById("results");
-const resWpm = document.getElementById("resWpm");
-const resAcc = document.getElementById("resAcc");
-const resErr = document.getElementById("resErr");
+        let activeTab = 'buildings';
 
-function generateText() {
-  fullText = "";
-  for(let i=0;i<100;i++) fullText += words[Math.floor(Math.random()*words.length)] + " ";
-  fullText = fullText.trim();
-  typed = [];
-  currentIndex = 0;
-  errors = 0;
-  timeLeft = durationSelect.value * 60;
-  started = false;
-  input.value="";
-  input.disabled=false;
-  updateDisplay();
-  wpmSpan.textContent="0";
-  accSpan.textContent="100%";
-  errSpan.textContent="0";
-  timeSpan.textContent=timeLeft;
-  resultsDiv.style.display="none";
-}
+        // Initialize game state
+        buildings.forEach(building => {
+            if (!gameState.buildings[building.id]) {
+                gameState.buildings[building.id] = 0;
+            }
+        });
 
-function updateDisplay() {
-  textDiv.innerHTML = "";
-  for(let i=0;i<fullText.length;i++) {
-    let span = document.createElement("span");
-    if(i < typed.length) {
-      span.textContent = fullText[i];
-      span.className = typed[i] === fullText[i] ? "correct" : "wrong";
-    } else if(i===typed.length) {
-      span.textContent = fullText[i];
-      span.className = "current";
-    } else {
-      span.textContent = fullText[i];
-    }
-    textDiv.appendChild(span);
-  }
-}
+        clickUpgradesConfig.forEach(upgrade => {
+            if (!gameState.clickUpgrades[upgrade.id]) {
+                gameState.clickUpgrades[upgrade.id] = false;
+            }
+        });
 
-function startTimer() {
-  if(started) return;
-  started = true;
-  timer = setInterval(()=>{
-    timeLeft--;
-    timeSpan.textContent = timeLeft;
-    if(timeLeft<=0) finishTest();
-  },1000);
-}
+        // Format large numbers
+        function formatNumber(num) {
+            if (num < 1000) return Math.floor(num).toString();
+            if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+            if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
+            return (num / 1000000000000).toFixed(1) + 'T';
+        }
 
-function finishTest() {
-  clearInterval(timer);
-  input.disabled=true;
-  const wpm = Math.floor(typed.length/5 / (durationSelect.value));
-  const accuracy = typed.length ? Math.floor((typed.length - errors)/typed.length*100) : 100;
-  resWpm.textContent = wpm;
-  resAcc.textContent = accuracy+"%";
-  resErr.textContent = errors;
-  resultsDiv.style.display="block";
-}
+        // Update display
+        function updateDisplay() {
+            document.getElementById('pizzaCount').textContent = formatNumber(gameState.pizzas) + ' pizzas';
+            document.getElementById('perSecond').textContent = 'per second: ' + formatNumber(gameState.pizzasPerSecond);
+            document.getElementById('totalClicks').textContent = formatNumber(gameState.totalClicks);
+            document.getElementById('totalEarned').textContent = formatNumber(gameState.totalEarned);
+            document.getElementById('clickPower').textContent = formatNumber(gameState.pizzasPerClick);
+        }
 
-function restartTest() {
-  generateText();
-  input.focus();
-}
+        // Calculate cost
+        function calculateCost(baseCost, owned) {
+            return Math.floor(baseCost * Math.pow(1.15, owned));
+        }
 
-input.addEventListener("keydown",(e)=>{
-  if(e.key==="Backspace" || e.ctrlKey || e.metaKey) e.preventDefault();
-});
+        // Calculate click power
+        function calculateClickPower() {
+            let power = 1;
+            clickUpgradesConfig.forEach(upgrade => {
+                if (gameState.clickUpgrades[upgrade.id]) {
+                    power *= upgrade.multiplier;
+                }
+            });
+            gameState.pizzasPerClick = power;
+        }
 
-input.addEventListener("input", ()=>{
-  if(!started) startTimer();
-  const char = input.value[input.value.length-1];
-  if(char === undefined) return;
+        // Switch tabs
+        function switchTab(tab) {
+            activeTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.shop-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            document.getElementById('buildingsTab').style.display = tab === 'buildings' ? 'block' : 'none';
+            document.getElementById('upgradesTab').style.display = tab === 'upgrades' ? 'block' : 'none';
+        }
 
-  typed.push(char);
-  if(char !== fullText[currentIndex]) errors++;
-  currentIndex++;
-  updateDisplay();
-  wpmSpan.textContent = Math.floor(typed.length/5);
-  const accuracy = typed.length ? Math.floor((typed.length-errors)/typed.length*100) : 100;
-  accSpan.textContent = accuracy+"%";
-  errSpan.textContent = errors;
+        // Render buildings shop
+        function renderBuildingsShop() {
+            const shopContainer = document.getElementById('shopItems');
+            shopContainer.innerHTML = '';
+            
+            buildings.forEach(building => {
+                const owned = gameState.buildings[building.id] || 0;
+                const cost = calculateCost(building.baseCost, owned);
+                const canAfford = gameState.pizzas >= cost;
+                
+                const item = document.createElement('div');
+                item.className = 'upgrade-item' + (canAfford ? '' : ' locked');
+                item.innerHTML = `
+                    <div class="upgrade-owned">${owned}</div>
+                    <div class="upgrade-name">${building.icon} ${building.name}</div>
+                    <div class="upgrade-cost">Cost: ${formatNumber(cost)} pizzas</div>
+                    <div class="upgrade-effect">${building.description} (+${formatNumber(building.baseProduction * (owned + 1) - building.baseProduction * owned)}/s)</div>
+                `;
+                
+                if (canAfford) {
+                    item.onclick = () => buyBuilding(building.id);
+                }
+                
+                shopContainer.appendChild(item);
+            });
+        }
 
-  if(currentIndex>=fullText.length) finishTest();
-});
+        // Render click upgrades shop
+        function renderClickUpgradesShop() {
+            const upgradesContainer = document.getElementById('clickUpgrades');
+            upgradesContainer.innerHTML = '';
+            
+            clickUpgradesConfig.forEach(upgrade => {
+                const owned = gameState.clickUpgrades[upgrade.id];
+                const canAfford = gameState.pizzas >= upgrade.cost && !owned;
+                
+                const item = document.createElement('div');
+                item.className = 'upgrade-item' + (owned ? ' locked' : (canAfford ? '' : ' locked'));
+                item.innerHTML = `
+                    <div class="upgrade-owned">${owned ? '✓' : ''}</div>
+                    <div class="upgrade-name">${upgrade.name}</div>
+                    <div class="upgrade-cost">${owned ? 'OWNED' : 'Cost: ' + formatNumber(upgrade.cost) + ' pizzas'}</div>
+                    <div class="upgrade-effect">${upgrade.description} (${upgrade.multiplier}x multiplier)</div>
+                `;
+                
+                if (canAfford && !owned) {
+                    item.onclick = () => buyClickUpgrade(upgrade.id);
+                }
+                
+                upgradesContainer.appendChild(item);
+            });
+        }
 
-// Regenerate text if duration changes
-durationSelect.addEventListener("change", generateText);
+        // Buy building
+        function buyBuilding(buildingId) {
+            const building = buildings.find(b => b.id === buildingId);
+            const owned = gameState.buildings[buildingId] || 0;
+            const cost = calculateCost(building.baseCost, owned);
+            
+            if (gameState.pizzas >= cost) {
+                gameState.pizzas -= cost;
+                gameState.buildings[buildingId] = owned + 1;
+                calculateProduction();
+                updateDisplay();
+                
+                // Force immediate shop update after purchase
+                setTimeout(() => {
+                    renderBuildingsShop();
+                }, 50);
+                
+                // Check for building milestones
+                if ((owned + 1) % 10 === 0) {
+                    showAchievement(`${building.name} Master!`, `You have ${owned + 1} ${building.name}s!`);
+                }
+            }
+        }
 
-// Initialize
-generateText();
-input.focus();
-</script>
+        // Buy click upgrade
+        function buyClickUpgrade(upgradeId) {
+            const upgrade = clickUpgradesConfig.find(u => u.id === upgradeId);
+            
+            if (gameState.pizzas >= upgrade.cost && !gameState.clickUpgrades[upgradeId]) {
+                gameState.pizzas -= upgrade.cost;
+                gameState.clickUpgrades[upgradeId] = true;
+                calculateClickPower();
+                updateDisplay();
+                
+                // Force immediate shop update after purchase
+                setTimeout(() => {
+                    renderClickUpgradesShop();
+                }, 50);
+                
+                showAchievement('Upgrade Unlocked!', upgrade.name);
+            }
+        }
+
+        // Calculate production
+        function calculateProduction() {
+            let totalProduction = 0;
+            buildings.forEach(building => {
+                const owned = gameState.buildings[building.id] || 0;
+                totalProduction += building.baseProduction * owned;
+            });
+            gameState.pizzasPerSecond = totalProduction;
+        }
+
+        // Pizza button click
+        document.getElementById('pizzaButton').addEventListener('click', function(e) {
+            gameState.pizzas += gameState.pizzasPerClick;
+            gameState.totalClicks++;
+            gameState.totalEarned += gameState.pizzasPerClick;
+            
+            // Create click effect
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = '+' + formatNumber(gameState.pizzasPerClick);
+            effect.style.left = (e.pageX - 50) + 'px';
+            effect.style.top = (e.pageY - 50) + 'px';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => effect.remove(), 1000);
+            
+            updateDisplay();
+            
+            // Force shop update when reaching upgrade thresholds
+            if (gameState.pizzas >= 15 || gameState.pizzas >= 100 || gameState.pizzas >= 1000) {
+                if (activeTab === 'buildings') {
+                    renderBuildingsShop();
+                } else {
+                    renderClickUpgradesShop();
+                }
+            }
+        });
+
+        // Auto-clicker functionality
+        setInterval(function() {
+            const autoClickers = gameState.buildings.cursor || 0;
+            if (autoClickers > 0) {
+                // Each auto clicker clicks once per second
+                const autoClicks = autoClickers * gameState.pizzasPerClick;
+                gameState.pizzas += autoClicks;
+                gameState.totalEarned += autoClicks;
+                
+                // Visual effect for auto clicks
+                if (Math.random() < 0.3) { // 30% chance to show effect
+                    const effect = document.createElement('div');
+                    effect.className = 'click-effect';
+                    effect.textContent = '+' + formatNumber(autoClicks);
+                    effect.style.left = (window.innerWidth / 2 - 50 + Math.random() * 100) + 'px';
+                    effect.style.top = (window.innerHeight / 2 - 50 + Math.random() * 100) + 'px';
+                    effect.style.color = '#00ff00';
+                    document.body.appendChild(effect);
+                    
+                    setTimeout(() => effect.remove(), 1000);
+                }
+            }
+        }, 1000);
+
+        // Production loop
+        let lastShopUpdate = 0;
+        setInterval(function() {
+            if (gameState.pizzasPerSecond > 0) {
+                const production = gameState.pizzasPerSecond / 10;
+                gameState.pizzas += production;
+                gameState.totalEarned += production;
+                updateDisplay();
+                
+                // Only update shop every 500ms to prevent glitching
+                const now = Date.now();
+                if (now - lastShopUpdate > 500) {
+                    lastShopUpdate = now;
+                    if (activeTab === 'buildings') {
+                        renderBuildingsShop();
+                    } else {
+                        renderClickUpgradesShop();
+                    }
+                }
+            } else {
+                // If no production, still update display and check for shop updates less frequently
+                updateDisplay();
+                const now = Date.now();
+                if (now - lastShopUpdate > 1000) { // Update every 1 second when no production
+                    lastShopUpdate = now;
+                    if (activeTab === 'buildings') {
+                        renderBuildingsShop();
+                    } else {
+                        renderClickUpgradesShop();
+                    }
+                }
+            }
+        }, 100);
+
+        // Save game with localStorage
+        function saveGame() {
+            try {
+                gameState.lastSave = Date.now();
+                localStorage.setItem('pizzaClickerSave', JSON.stringify(gameState));
+                showNotification('Game Saved!');
+            } catch (error) {
+                showNotification('Save failed!', 'error');
+                console.error('Save error:', error);
+            }
+        }
+
+        // Load game from localStorage
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem('pizzaClickerSave');
+                if (saved) {
+                    const loadedState = JSON.parse(saved);
+                    
+                    // Merge saved state with current state to handle new features
+                    gameState = {
+                        ...gameState,
+                        ...loadedState
+                    };
+                    
+                    // Calculate offline progress
+                    const now = Date.now();
+                    const timeDiff = (now - gameState.lastSave) / 1000; // seconds
+                    if (timeDiff > 60) { // If offline for more than 1 minute
+                        const offlineEarnings = gameState.pizzasPerSecond * Math.min(timeDiff, 86400); // Max 24 hours
+                        if (offlineEarnings > 0) {
+                            gameState.pizzas += offlineEarnings;
+                            gameState.totalEarned += offlineEarnings;
+                            showNotification(`Welcome back! You earned ${formatNumber(offlineEarnings)} pizzas while away!`);
+                        }
+                    }
+                    
+                    calculateProduction();
+                    calculateClickPower();
+                    updateDisplay();
+                    if (activeTab === 'buildings') {
+                        renderBuildingsShop();
+                    } else {
+                        renderClickUpgradesShop();
+                    }
+                }
+            } catch (error) {
+                showNotification('Load failed!', 'error');
+                console.error('Load error:', error);
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            if (confirm('Are you sure you want to reset? You will lose all progress!')) {
+                gameState = {
+                    pizzas: 0,
+                    pizzasPerSecond: 0,
+                    pizzasPerClick: 1,
+                    totalClicks: 0,
+                    totalEarned: 0,
+                    buildings: {},
+                    clickUpgrades: {},
+                    achievements: [],
+                    lastSave: Date.now()
+                };
+                
+                // Initialize buildings and upgrades
+                buildings.forEach(building => {
+                    gameState.buildings[building.id] = 0;
+                });
+                
+                clickUpgradesConfig.forEach(upgrade => {
+                    gameState.clickUpgrades[upgrade.id] = false;
+                });
+                
+                localStorage.removeItem('pizzaClickerSave');
+                
+                calculateProduction();
+                calculateClickPower();
+                updateDisplay();
+                
+                // Force immediate shop re-render after reset
+                renderBuildingsShop();
+                renderClickUpgradesShop();
+                
+                showNotification('Game Reset!');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#f44336' : '#4caf50';
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Achievement queue system
+        let achievementQueue = [];
+        let activeAchievements = [];
+
+        // Show achievement
+        function showAchievement(title, description) {
+            const achievementData = { title, description, id: Date.now() + Math.random() };
+            achievementQueue.push(achievementData);
+            processAchievementQueue();
+        }
+
+        function processAchievementQueue() {
+            if (achievementQueue.length === 0) return;
+            
+            const maxVisible = 4; // Maximum achievements visible at once
+            while (activeAchievements.length < maxVisible && achievementQueue.length > 0) {
+                const data = achievementQueue.shift();
+                displayAchievement(data);
+            }
+        }
+
+        function displayAchievement(data) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement';
+            achievement.style.top = (100 + activeAchievements.length * 80) + 'px';
+            achievement.innerHTML = `
+                <h3>🏆 ${data.title}</h3>
+                <p>${data.description}</p>
+            `;
+            
+            document.body.appendChild(achievement);
+            activeAchievements.push({ element: achievement, id: data.id });
+            
+            setTimeout(() => {
+                removeAchievement(data.id);
+            }, 4000);
+        }
+
+        function removeAchievement(id) {
+            const index = activeAchievements.findIndex(a => a.id === id);
+            if (index !== -1) {
+                const achievement = activeAchievements[index];
+                achievement.element.style.animation = 'achievementSlide 0.5s reverse';
+                
+                setTimeout(() => {
+                    if (achievement.element.parentNode) {
+                        achievement.element.remove();
+                    }
+                    activeAchievements.splice(index, 1);
+                    
+                    // Reposition remaining achievements
+                    activeAchievements.forEach((a, i) => {
+                        a.element.style.top = (100 + i * 80) + 'px';
+                    });
+                    
+                    // Process queue if there are more achievements waiting
+                    processAchievementQueue();
+                }, 500);
+            }
+        }
+
+        // Create floating pizzas background
+        function createFloatingPizzas() {
+            for (let i = 0; i < 10; i++) {
+                const pizza = document.createElement('div');
+                pizza.className = 'floating-pizza';
+                pizza.textContent = '🍕';
+                pizza.style.left = Math.random() * 100 + '%';
+                pizza.style.animationDelay = Math.random() * 15 + 's';
+                pizza.style.animationDuration = (15 + Math.random() * 10) + 's';
+                document.body.appendChild(pizza);
+            }
+        }
+
+        // Auto-save every 30 seconds
+        setInterval(() => {
+            saveGame();
+        }, 30000);
+
+        // Achievement checking
+        function checkAchievements() {
+            const achievements = [
+                { id: 'first_100', condition: gameState.totalEarned >= 100, title: 'Pizza Starter', desc: 'Earned 100 pizzas!' },
+                { id: 'first_1000', condition: gameState.totalEarned >= 1000, title: 'Pizza Enthusiast', desc: 'Earned 1,000 pizzas!' },
+                { id: 'first_10000', condition: gameState.totalEarned >= 10000, title: 'Pizza Pro', desc: 'Earned 10,000 pizzas!' },
+                { id: 'first_100000', condition: gameState.totalEarned >= 100000, title: 'Pizza Master', desc: 'Earned 100,000 pizzas!' },
+                { id: 'first_million', condition: gameState.totalEarned >= 1000000, title: 'Pizza Millionaire', desc: 'Earned 1 million pizzas!' },
+                { id: 'first_billion', condition: gameState.totalEarned >= 1000000000, title: 'Pizza Billionaire', desc: 'Earned 1 billion pizzas!' },
+                { id: 'click_100', condition: gameState.totalClicks >= 100, title: 'Click Novice', desc: 'Clicked 100 times!' },
+                { id: 'click_1000', condition: gameState.totalClicks >= 1000, title: 'Click Master', desc: 'Clicked 1,000 times!' },
+                { id: 'click_10000', condition: gameState.totalClicks >= 10000, title: 'Click Legend', desc: 'Clicked 10,000 times!' },
+                { id: 'first_building', condition: Object.values(gameState.buildings).some(count => count > 0), title: 'Builder', desc: 'Bought your first building!' },
+                { id: 'ten_buildings', condition: Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 10, title: 'Industrialist', desc: 'Own 10 buildings!' },
+                { id: 'hundred_buildings', condition: Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 100, title: 'Tycoon', desc: 'Own 100 buildings!' },
+                { id: 'first_upgrade', condition: Object.values(gameState.clickUpgrades).some(owned => owned), title: 'Upgrader', desc: 'Bought your first upgrade!' },
+                { id: 'all_upgrades', condition: clickUpgradesConfig.every(upgrade => gameState.clickUpgrades[upgrade.id]), title: 'Ultimate Clicker', desc: 'Bought all click upgrades!' }
+            ];
+
+            achievements.forEach(achievement => {
+                if (achievement.condition && !gameState.achievements.includes(achievement.id)) {
+                    gameState.achievements.push(achievement.id);
+                    showAchievement(achievement.title, achievement.desc);
+                }
+            });
+        }
+
+        // Initialize game
+        window.addEventListener('load', function() {
+            createFloatingPizzas();
+            loadGame();
+            calculateProduction();
+            calculateClickPower();
+            updateDisplay();
+            renderBuildingsShop();
+            renderClickUpgradesShop();
+            
+            // Check achievements periodically
+            setInterval(checkAchievements, 2000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 's' && e.ctrlKey) {
+                e.preventDefault();
+                saveGame();
+            }
+            
+            // Space bar to click pizza
+            if (e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('pizzaButton').click();
+            }
+        });
+
+        // Handle page visibility change for better auto-save
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                saveGame();
+            }
+        });
+
+        // Save before page unload
+        window.addEventListener('beforeunload', function() {
+            saveGame();
+        });
+    </script>
 </body>
 </html>
