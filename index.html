@@ -1314,21 +1314,39 @@
         // Achievement queue system
         let achievementQueue = [];
         let activeAchievements = [];
+        let isProcessingQueue = false;
 
         // Show achievement
         function showAchievement(title, description) {
             const achievementData = { title, description, id: Date.now() + Math.random() };
             achievementQueue.push(achievementData);
-            processAchievementQueue();
+            if (!isProcessingQueue) {
+                processAchievementQueue();
+            }
         }
 
         function processAchievementQueue() {
-            if (achievementQueue.length === 0) return;
+            if (achievementQueue.length === 0) {
+                isProcessingQueue = false;
+                return;
+            }
             
-            const maxVisible = 4; // Maximum achievements visible at once
-            while (activeAchievements.length < maxVisible && achievementQueue.length > 0) {
+            isProcessingQueue = true;
+            const maxVisible = 4;
+            
+            if (activeAchievements.length < maxVisible) {
                 const data = achievementQueue.shift();
                 displayAchievement(data);
+                
+                // Process next achievement after a small delay
+                setTimeout(() => {
+                    processAchievementQueue();
+                }, 100);
+            } else {
+                // Wait a bit and try again if queue is full
+                setTimeout(() => {
+                    processAchievementQueue();
+                }, 500);
             }
         }
 
@@ -1336,14 +1354,24 @@
             const achievement = document.createElement('div');
             achievement.className = 'achievement';
             achievement.style.top = (100 + activeAchievements.length * 80) + 'px';
+            achievement.style.transform = 'translateX(-400px)';
             achievement.innerHTML = `
                 <h3>🏆 ${data.title}</h3>
                 <p>${data.description}</p>
             `;
             
             document.body.appendChild(achievement);
+            
+            // Force a reflow to ensure initial position is set
+            achievement.offsetHeight;
+            
+            // Slide in
+            achievement.style.transform = 'translateX(0)';
+            achievement.style.transition = 'transform 0.5s ease-out';
+            
             activeAchievements.push({ element: achievement, id: data.id });
             
+            // Set removal timer
             setTimeout(() => {
                 removeAchievement(data.id);
             }, 4000);
@@ -1351,25 +1379,38 @@
 
         function removeAchievement(id) {
             const index = activeAchievements.findIndex(a => a.id === id);
-            if (index !== -1) {
-                const achievement = activeAchievements[index];
-                achievement.element.style.animation = 'achievementSlide 0.5s reverse';
+            if (index === -1) return;
+            
+            const achievement = activeAchievements[index];
+            
+            // Slide out
+            achievement.element.style.transform = 'translateX(-400px)';
+            achievement.element.style.transition = 'transform 0.5s ease-in';
+            
+            // Remove from DOM after animation
+            setTimeout(() => {
+                if (achievement.element && achievement.element.parentNode) {
+                    achievement.element.parentNode.removeChild(achievement.element);
+                }
                 
-                setTimeout(() => {
-                    if (achievement.element.parentNode) {
-                        achievement.element.remove();
-                    }
-                    activeAchievements.splice(index, 1);
-                    
-                    // Reposition remaining achievements
-                    activeAchievements.forEach((a, i) => {
+                // Remove from active list
+                const currentIndex = activeAchievements.findIndex(a => a.id === id);
+                if (currentIndex !== -1) {
+                    activeAchievements.splice(currentIndex, 1);
+                }
+                
+                // Reposition remaining achievements
+                activeAchievements.forEach((a, i) => {
+                    if (a.element && a.element.parentNode) {
                         a.element.style.top = (100 + i * 80) + 'px';
-                    });
-                    
-                    // Process queue if there are more achievements waiting
+                    }
+                });
+                
+                // Continue processing queue
+                if (achievementQueue.length > 0 && !isProcessingQueue) {
                     processAchievementQueue();
-                }, 500);
-            }
+                }
+            }, 500);
         }
 
         // Create floating pizzas background
