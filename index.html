@@ -220,13 +220,13 @@
 
         .shop-tabs {
             display: flex;
-            gap: 10px;
+            gap: 5px;
             margin-bottom: 20px;
         }
 
         .shop-tab {
             flex: 1;
-            padding: 10px;
+            padding: 10px 8px;
             background: rgba(118, 75, 162, 0.2);
             border: none;
             border-radius: 10px;
@@ -234,6 +234,7 @@
             font-weight: 600;
             color: #764ba2;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
 
         .shop-tab.active {
@@ -299,6 +300,110 @@
             color: #fff;
             opacity: 0.8;
             margin-top: 5px;
+        }
+
+        .achievement-item {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-item.locked {
+            opacity: 0.4;
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+        }
+
+        .achievement-item.unlocked {
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .achievement-item.unlocked:hover {
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            float: left;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .achievement-content {
+            overflow: hidden;
+        }
+
+        .achievement-title {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .achievement-desc {
+            font-size: 0.95rem;
+            color: #fff;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+
+        .achievement-progress {
+            font-size: 0.85rem;
+            color: #fff;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .achievement-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .achievement-item.unlocked .achievement-status {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        .achievements-stats {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .achievements-progress {
+            color: #764ba2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(118, 75, 162, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 5px;
+            transition: width 0.3s ease;
         }
 
         .save-buttons {
@@ -487,6 +592,7 @@
             <div class="shop-tabs">
                 <button class="shop-tab active" onclick="switchTab('buildings')">Buildings</button>
                 <button class="shop-tab" onclick="switchTab('upgrades')">Upgrades</button>
+                <button class="shop-tab" onclick="switchTab('achievements')">Achievements</button>
             </div>
             
             <div id="buildingsTab">
@@ -495,6 +601,10 @@
             
             <div id="upgradesTab" style="display: none;">
                 <div id="clickUpgrades"></div>
+            </div>
+            
+            <div id="achievementsTab" style="display: none;">
+                <div id="achievementsList"></div>
             </div>
         </div>
     </div>
@@ -509,6 +619,72 @@
     <div class="credits">coded by rizzyjulian</div>
 
     <script>
+        // Source code protection features
+        (function() {
+            'use strict';
+            
+            // Disable right-click context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Disable F12, Ctrl+Shift+I, Ctrl+U (View Source)
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Ctrl+Shift+I (Developer Tools)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Ctrl+Shift+J (Console)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Ctrl+Shift+C (Element Inspector)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Ctrl+U (View Source)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Disable text selection (already in CSS but reinforced here)
+            document.onselectstart = function() {
+                return false;
+            };
+            
+            // Disable drag functionality
+            document.ondragstart = function() {
+                return false;
+            };
+            
+            // Clear console periodically (optional - can be annoying for legitimate debugging)
+            setInterval(function() {
+                if (typeof console !== 'undefined') {
+                    try {
+                        console.clear();
+                    } catch(e) {
+                        // Ignore errors
+                    }
+                }
+            }, 2000);
+            
+        })();
+
         // Game state
         let gameState = {
             pizzas: 0,
@@ -645,6 +821,62 @@
             }
         ];
 
+        // Comprehensive achievements configuration
+        const allAchievements = [
+            // Earning milestones
+            { id: 'first_10', icon: '🍕', title: 'First Taste', desc: 'Earn your first 10 pizzas', condition: () => gameState.totalEarned >= 10 },
+            { id: 'first_100', icon: '🎯', title: 'Pizza Starter', desc: 'Earn 100 pizzas', condition: () => gameState.totalEarned >= 100 },
+            { id: 'first_1000', icon: '⭐', title: 'Pizza Enthusiast', desc: 'Earn 1,000 pizzas', condition: () => gameState.totalEarned >= 1000 },
+            { id: 'first_10000', icon: '🏆', title: 'Pizza Pro', desc: 'Earn 10,000 pizzas', condition: () => gameState.totalEarned >= 10000 },
+            { id: 'first_100000', icon: '💎', title: 'Pizza Master', desc: 'Earn 100,000 pizzas', condition: () => gameState.totalEarned >= 100000 },
+            { id: 'first_million', icon: '🌟', title: 'Pizza Millionaire', desc: 'Earn 1 million pizzas', condition: () => gameState.totalEarned >= 1000000 },
+            { id: 'first_billion', icon: '🚀', title: 'Pizza Billionaire', desc: 'Earn 1 billion pizzas', condition: () => gameState.totalEarned >= 1000000000 },
+            { id: 'first_trillion', icon: '🌌', title: 'Pizza Trillionaire', desc: 'Earn 1 trillion pizzas', condition: () => gameState.totalEarned >= 1000000000000 },
+            
+            // Click achievements
+            { id: 'click_10', icon: '👆', title: 'First Clicks', desc: 'Click 10 times', condition: () => gameState.totalClicks >= 10 },
+            { id: 'click_100', icon: '✋', title: 'Click Novice', desc: 'Click 100 times', condition: () => gameState.totalClicks >= 100 },
+            { id: 'click_1000', icon: '👊', title: 'Click Master', desc: 'Click 1,000 times', condition: () => gameState.totalClicks >= 1000 },
+            { id: 'click_10000', icon: '⚡', title: 'Click Legend', desc: 'Click 10,000 times', condition: () => gameState.totalClicks >= 10000 },
+            { id: 'click_100000', icon: '🔥', title: 'Click God', desc: 'Click 100,000 times', condition: () => gameState.totalClicks >= 100000 },
+            
+            // Building achievements
+            { id: 'first_building', icon: '🏗️', title: 'Builder', desc: 'Buy your first building', condition: () => Object.values(gameState.buildings).some(count => count > 0) },
+            { id: 'ten_buildings', icon: '🏭', title: 'Industrialist', desc: 'Own 10 buildings total', condition: () => Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 10 },
+            { id: 'fifty_buildings', icon: '🌆', title: 'City Builder', desc: 'Own 50 buildings total', condition: () => Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 50 },
+            { id: 'hundred_buildings', icon: '🏙️', title: 'Tycoon', desc: 'Own 100 buildings total', condition: () => Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 100 },
+            { id: 'thousand_buildings', icon: '🌍', title: 'Empire Builder', desc: 'Own 1,000 buildings total', condition: () => Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 1000 },
+            
+            // Specific building achievements
+            { id: 'cursor_master', icon: '👆', title: 'Cursor Master', desc: 'Own 100 Auto Clickers', condition: () => (gameState.buildings.cursor || 0) >= 100 },
+            { id: 'grandma_army', icon: '👵', title: 'Grandma Army', desc: 'Own 50 Pizza Grandmas', condition: () => (gameState.buildings.grandma || 0) >= 50 },
+            { id: 'oven_factory', icon: '🔥', title: 'Oven Factory', desc: 'Own 25 Pizza Ovens', condition: () => (gameState.buildings.oven || 0) >= 25 },
+            { id: 'restaurant_chain', icon: '🏪', title: 'Restaurant Chain', desc: 'Own 10 Pizza Restaurants', condition: () => (gameState.buildings.restaurant || 0) >= 10 },
+            { id: 'space_explorer', icon: '🚀', title: 'Space Explorer', desc: 'Own a Space Pizzeria', condition: () => (gameState.buildings.spaceship || 0) >= 1 },
+            { id: 'time_lord', icon: '⏰', title: 'Time Lord', desc: 'Own a Time Machine', condition: () => (gameState.buildings.timemachine || 0) >= 1 },
+            { id: 'antimatter_scientist', icon: '⚛️', title: 'Antimatter Scientist', desc: 'Own an Antimatter Condenser', condition: () => (gameState.buildings.antimatter || 0) >= 1 },
+            
+            // Upgrade achievements
+            { id: 'first_upgrade', icon: '⬆️', title: 'Upgrader', desc: 'Buy your first upgrade', condition: () => Object.values(gameState.clickUpgrades).some(owned => owned) },
+            { id: 'half_upgrades', icon: '📈', title: 'Improvement Seeker', desc: 'Buy half of all upgrades', condition: () => Object.values(gameState.clickUpgrades).filter(owned => owned).length >= Math.ceil(clickUpgradesConfig.length / 2) },
+            { id: 'all_upgrades', icon: '🎖️', title: 'Ultimate Clicker', desc: 'Buy all click upgrades', condition: () => clickUpgradesConfig.every(upgrade => gameState.clickUpgrades[upgrade.id]) },
+            
+            // Production achievements
+            { id: 'passive_income', icon: '💰', title: 'Passive Income', desc: 'Reach 10 pizzas per second', condition: () => gameState.pizzasPerSecond >= 10 },
+            { id: 'pizza_factory_production', icon: '🏭', title: 'Pizza Factory', desc: 'Reach 100 pizzas per second', condition: () => gameState.pizzasPerSecond >= 100 },
+            { id: 'pizza_empire', icon: '👑', title: 'Pizza Empire', desc: 'Reach 1,000 pizzas per second', condition: () => gameState.pizzasPerSecond >= 1000 },
+            { id: 'pizza_universe', icon: '🌌', title: 'Pizza Universe', desc: 'Reach 10,000 pizzas per second', condition: () => gameState.pizzasPerSecond >= 10000 },
+            
+            // Click power achievements
+            { id: 'double_click', icon: '💪', title: 'Double Trouble', desc: 'Reach 2x click power', condition: () => gameState.pizzasPerClick >= 2 },
+            { id: 'super_click', icon: '⚡', title: 'Super Clicker', desc: 'Reach 10x click power', condition: () => gameState.pizzasPerClick >= 10 },
+            { id: 'mega_click', icon: '💥', title: 'Mega Clicker', desc: 'Reach 100x click power', condition: () => gameState.pizzasPerClick >= 100 },
+            { id: 'god_click', icon: '🌟', title: 'God-tier Clicker', desc: 'Reach 1000x click power', condition: () => gameState.pizzasPerClick >= 1000 },
+            
+            // Special achievements
+            { id: 'efficiency_expert', icon: '📊', title: 'Efficiency Expert', desc: 'Reach 1 million total pizzas with less than 1000 clicks', condition: () => gameState.totalEarned >= 1000000 && gameState.totalClicks < 1000 }
+        ];
+
         let activeTab = 'buildings';
 
         // Initialize game state
@@ -707,6 +939,12 @@
             // Show/hide content
             document.getElementById('buildingsTab').style.display = tab === 'buildings' ? 'block' : 'none';
             document.getElementById('upgradesTab').style.display = tab === 'upgrades' ? 'block' : 'none';
+            document.getElementById('achievementsTab').style.display = tab === 'achievements' ? 'block' : 'none';
+            
+            // Render content based on active tab
+            if (tab === 'achievements') {
+                renderAchievementsList();
+            }
         }
 
         // Render buildings shop
@@ -759,6 +997,68 @@
                 }
                 
                 upgradesContainer.appendChild(item);
+            });
+        }
+
+        // Render achievements list
+        function renderAchievementsList() {
+            const achievementsContainer = document.getElementById('achievementsList');
+            achievementsContainer.innerHTML = '';
+            
+            // Add achievements progress stats
+            const unlockedCount = allAchievements.filter(achievement => gameState.achievements.includes(achievement.id)).length;
+            const totalCount = allAchievements.length;
+            const progressPercent = (unlockedCount / totalCount) * 100;
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'achievements-stats';
+            statsDiv.innerHTML = `
+                <div class="achievements-progress">${unlockedCount}/${totalCount} Achievements Unlocked</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+            `;
+            achievementsContainer.appendChild(statsDiv);
+            
+            // Render individual achievements
+            allAchievements.forEach(achievement => {
+                const isUnlocked = gameState.achievements.includes(achievement.id);
+                const canUnlock = achievement.condition();
+                
+                const item = document.createElement('div');
+                item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+                
+                let progressText = '';
+                if (!isUnlocked && canUnlock) {
+                    progressText = '<div class="achievement-progress">Ready to unlock!</div>';
+                } else if (!isUnlocked) {
+                    // Add progress hints for some achievements
+                    if (achievement.id.includes('first_') && achievement.id !== 'first_building' && achievement.id !== 'first_upgrade') {
+                        const targetValue = achievement.desc.match(/[\d,]+/);
+                        if (targetValue) {
+                            const target = parseInt(targetValue[0].replace(/,/g, ''));
+                            let current = 0;
+                            if (achievement.id.includes('click_')) {
+                                current = gameState.totalClicks;
+                            } else {
+                                current = gameState.totalEarned;
+                            }
+                            progressText = `<div class="achievement-progress">Progress: ${formatNumber(current)}/${formatNumber(target)}</div>`;
+                        }
+                    }
+                }
+                
+                item.innerHTML = `
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-content">
+                        <div class="achievement-title">${achievement.title}</div>
+                        <div class="achievement-desc">${achievement.desc}</div>
+                        ${progressText}
+                    </div>
+                    <div class="achievement-status">${isUnlocked ? 'UNLOCKED' : 'LOCKED'}</div>
+                `;
+                
+                achievementsContainer.appendChild(item);
             });
         }
 
@@ -837,8 +1137,10 @@
             if (gameState.pizzas >= 15 || gameState.pizzas >= 100 || gameState.pizzas >= 1000) {
                 if (activeTab === 'buildings') {
                     renderBuildingsShop();
-                } else {
+                } else if (activeTab === 'upgrades') {
                     renderClickUpgradesShop();
+                } else if (activeTab === 'achievements') {
+                    renderAchievementsList();
                 }
             }
         });
@@ -882,8 +1184,10 @@
                     lastShopUpdate = now;
                     if (activeTab === 'buildings') {
                         renderBuildingsShop();
-                    } else {
+                    } else if (activeTab === 'upgrades') {
                         renderClickUpgradesShop();
+                    } else if (activeTab === 'achievements') {
+                        renderAchievementsList();
                     }
                 }
             } else {
@@ -894,14 +1198,16 @@
                     lastShopUpdate = now;
                     if (activeTab === 'buildings') {
                         renderBuildingsShop();
-                    } else {
+                    } else if (activeTab === 'upgrades') {
                         renderClickUpgradesShop();
+                    } else if (activeTab === 'achievements') {
+                        renderAchievementsList();
                     }
                 }
             }
         }, 100);
 
-        // Save game with localStorage
+        // Save game
         function saveGame() {
             try {
                 gameState.lastSave = Date.now();
@@ -913,7 +1219,7 @@
             }
         }
 
-        // Load game from localStorage
+        // Load game
         function loadGame() {
             try {
                 const saved = localStorage.getItem('pizzaClickerSave');
@@ -943,8 +1249,10 @@
                     updateDisplay();
                     if (activeTab === 'buildings') {
                         renderBuildingsShop();
-                    } else {
+                    } else if (activeTab === 'upgrades') {
                         renderClickUpgradesShop();
+                    } else if (activeTab === 'achievements') {
+                        renderAchievementsList();
                     }
                 }
             } catch (error) {
@@ -986,6 +1294,7 @@
                 // Force immediate shop re-render after reset
                 renderBuildingsShop();
                 renderClickUpgradesShop();
+                renderAchievementsList();
                 
                 showNotification('Game Reset!');
             }
@@ -1083,25 +1392,8 @@
 
         // Achievement checking
         function checkAchievements() {
-            const achievements = [
-                { id: 'first_100', condition: gameState.totalEarned >= 100, title: 'Pizza Starter', desc: 'Earned 100 pizzas!' },
-                { id: 'first_1000', condition: gameState.totalEarned >= 1000, title: 'Pizza Enthusiast', desc: 'Earned 1,000 pizzas!' },
-                { id: 'first_10000', condition: gameState.totalEarned >= 10000, title: 'Pizza Pro', desc: 'Earned 10,000 pizzas!' },
-                { id: 'first_100000', condition: gameState.totalEarned >= 100000, title: 'Pizza Master', desc: 'Earned 100,000 pizzas!' },
-                { id: 'first_million', condition: gameState.totalEarned >= 1000000, title: 'Pizza Millionaire', desc: 'Earned 1 million pizzas!' },
-                { id: 'first_billion', condition: gameState.totalEarned >= 1000000000, title: 'Pizza Billionaire', desc: 'Earned 1 billion pizzas!' },
-                { id: 'click_100', condition: gameState.totalClicks >= 100, title: 'Click Novice', desc: 'Clicked 100 times!' },
-                { id: 'click_1000', condition: gameState.totalClicks >= 1000, title: 'Click Master', desc: 'Clicked 1,000 times!' },
-                { id: 'click_10000', condition: gameState.totalClicks >= 10000, title: 'Click Legend', desc: 'Clicked 10,000 times!' },
-                { id: 'first_building', condition: Object.values(gameState.buildings).some(count => count > 0), title: 'Builder', desc: 'Bought your first building!' },
-                { id: 'ten_buildings', condition: Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 10, title: 'Industrialist', desc: 'Own 10 buildings!' },
-                { id: 'hundred_buildings', condition: Object.values(gameState.buildings).reduce((a, b) => a + b, 0) >= 100, title: 'Tycoon', desc: 'Own 100 buildings!' },
-                { id: 'first_upgrade', condition: Object.values(gameState.clickUpgrades).some(owned => owned), title: 'Upgrader', desc: 'Bought your first upgrade!' },
-                { id: 'all_upgrades', condition: clickUpgradesConfig.every(upgrade => gameState.clickUpgrades[upgrade.id]), title: 'Ultimate Clicker', desc: 'Bought all click upgrades!' }
-            ];
-
-            achievements.forEach(achievement => {
-                if (achievement.condition && !gameState.achievements.includes(achievement.id)) {
+            allAchievements.forEach(achievement => {
+                if (achievement.condition() && !gameState.achievements.includes(achievement.id)) {
                     gameState.achievements.push(achievement.id);
                     showAchievement(achievement.title, achievement.desc);
                 }
@@ -1122,20 +1414,6 @@
             setInterval(checkAchievements, 2000);
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 's' && e.ctrlKey) {
-                e.preventDefault();
-                saveGame();
-            }
-            
-            // Space bar to click pizza
-            if (e.key === ' ') {
-                e.preventDefault();
-                document.getElementById('pizzaButton').click();
-            }
-        });
-
         // Handle page visibility change for better auto-save
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'hidden') {
@@ -1146,6 +1424,21 @@
         // Save before page unload
         window.addEventListener('beforeunload', function() {
             saveGame();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Space bar to click pizza
+            if (e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('pizzaButton').click();
+            }
+            
+            // Ctrl+S to save
+            if (e.key === 's' && e.ctrlKey) {
+                e.preventDefault();
+                saveGame();
+            }
         });
     </script>
 </body>
