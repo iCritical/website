@@ -303,7 +303,7 @@
         }
 
         .achievement-item {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border-radius: 15px;
             padding: 15px;
             margin-bottom: 15px;
@@ -1222,7 +1222,11 @@
         // Load game
         function loadGame() {
             try {
-                const saved = localStorage.getItem('pizzaClickerSave');
+                // Try multiple save keys for compatibility
+                let saved = localStorage.getItem('pizzaClickerSave') || 
+                           localStorage.getItem('pizzaGameSave') ||
+                           localStorage.getItem('pizzaClicker');
+                
                 if (saved) {
                     const loadedState = JSON.parse(saved);
                     
